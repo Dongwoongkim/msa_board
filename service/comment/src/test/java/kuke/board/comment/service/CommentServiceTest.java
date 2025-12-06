@@ -43,6 +43,9 @@ class CommentServiceTest {
         verify(comment).delete();
     }
 
+    /**
+     * parent ㄴ children (deleted)
+     */
     @Test
     @DisplayName("하위 댓글이 삭제되고, 삭제되지 않은 부모라면, 하위 댓글만 삭제한다.")
     void deleteShouldDeleteChildOnlyIfNotDeletedParent() {
@@ -51,22 +54,21 @@ class CommentServiceTest {
         Long commentId = 2L;
         Long parentCommentId = 1L;
 
-        Comment comment = createComment(articleId, commentId, parentCommentId);
-        given(comment.isRoot()).willReturn(false);
-
+        Comment childComment = createComment(articleId, commentId, parentCommentId);
         Comment parentComment = mock(Comment.class);
+
+        given(childComment.isRoot()).willReturn(false);
         given(parentComment.getDeleted()).willReturn(false);
 
-        given(commentRepository.findById(commentId)).willReturn(Optional.of(comment));
+        given(commentRepository.findById(commentId)).willReturn(Optional.of(childComment));
         given(commentRepository.countBy(articleId, commentId, 2L)).willReturn(1L);
-
         given(commentRepository.findById(parentCommentId)).willReturn(Optional.of(parentComment));
 
         // when
         commentService.delete(commentId);
 
         // then
-        verify(commentRepository).delete(comment);
+        verify(commentRepository).delete(childComment);
         verify(commentRepository, never()).delete(parentComment);
     }
 
