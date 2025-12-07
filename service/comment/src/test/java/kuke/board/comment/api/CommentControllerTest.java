@@ -1,9 +1,12 @@
 package kuke.board.comment.api;
 
+import java.util.List;
+import kuke.board.comment.service.response.CommentPageResponse;
 import kuke.board.comment.service.response.CommentResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.client.RestClient;
 
 class CommentControllerTest {
@@ -53,6 +56,91 @@ class CommentControllerTest {
             .body(request)
             .retrieve()
             .body(CommentResponse.class);
+    }
+
+    @Test
+    void readAll() {
+        CommentPageResponse response = restClient.get()
+            .uri("/v1/comments?articleId=1&page=1&pageSize=10")
+            .retrieve()
+            .body(CommentPageResponse.class);
+
+        System.out.println("response.getCommentCount() = " + response.getCommentCount());
+        for (CommentResponse comment : response.getComments()) {
+            if (comment.getCommentId().equals(comment.getParentCommentId())) {
+                System.out.println("comment.getCommentId() = " + comment.getCommentId());
+            } else {
+                System.out.println("\tcomment.getCommentId() = " + comment.getCommentId());
+            }
+        }
+
+        /**
+         * 1번 페이지 수행 결과
+         * response.getCommentCount() = 101
+         * comment.getCommentId() = 255621438515490816
+         * 	comment.getCommentId() = 255621438536462342
+         * comment.getCommentId() = 255621438515490817
+         * 	comment.getCommentId() = 255621438536462340
+         * comment.getCommentId() = 255621438515490818
+         * 	comment.getCommentId() = 255621438536462336
+         * comment.getCommentId() = 255621438515490819
+         * 	comment.getCommentId() = 255621438536462341
+         * comment.getCommentId() = 255621438515490820
+         * 	comment.getCommentId() = 255621438536462338
+         */
+    }
+
+    @Test
+    void readAllInfiniteScroll() {
+        List<CommentResponse> response1 = restClient.get()
+            .uri("/v1/comments/infinite-scroll?articleId=1&pageSize=5")
+            .retrieve()
+            .body(new ParameterizedTypeReference<List<CommentResponse>>() {
+            });
+
+        System.out.println("firstPage");
+        for (CommentResponse commentResponse : response1) {
+            if (commentResponse.getCommentId().equals(commentResponse.getParentCommentId())) {
+                System.out.println("comment.getCommentId() = " + commentResponse.getCommentId());
+            } else {
+                System.out.println("\tcomment.getCommentId() = " + commentResponse.getCommentId());
+            }
+        }
+
+        Long lastParentCommentId = response1.getLast().getParentCommentId();
+        Long lastCommentId = response1.getLast().getCommentId();
+
+        List<CommentResponse> response2 = restClient.get()
+            .uri("/v1/comments/infinite-scroll?articleId=1&pageSize=5&lastParentCommentId=%s&lastCommentId=%s"
+                .formatted(lastParentCommentId, lastCommentId))
+            .retrieve()
+            .body(new ParameterizedTypeReference<List<CommentResponse>>() {
+            });
+
+        System.out.println("secondPage");
+        for (CommentResponse commentResponse : response2) {
+            if (commentResponse.getCommentId().equals(commentResponse.getParentCommentId())) {
+                System.out.println("comment.getCommentId() = " + commentResponse.getCommentId());
+            } else {
+                System.out.println("\tcomment.getCommentId() = " + commentResponse.getCommentId());
+            }
+        }
+
+        /**
+         * firstPage
+         * comment.getCommentId() = 255621438515490816
+         * 	comment.getCommentId() = 255621438536462342
+         * comment.getCommentId() = 255621438515490817
+         * 	comment.getCommentId() = 255621438536462340
+         * comment.getCommentId() = 255621438515490818
+         *
+         * secondPage
+         * 	comment.getCommentId() = 255621438536462336
+         * comment.getCommentId() = 255621438515490819
+         * 	comment.getCommentId() = 255621438536462341
+         * comment.getCommentId() = 255621438515490820
+         * 	comment.getCommentId() = 255621438536462338
+         */
     }
 
     @Getter
