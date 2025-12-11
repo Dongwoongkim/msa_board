@@ -14,6 +14,8 @@ class PageLimitCalculatorTest {
         calculatePageLimitTest(10L, 30L, 10L, 301L);
         calculatePageLimitTest(11L, 30L, 10L, 601L);
         calculatePageLimitTest(12L, 30L, 10L, 601L);
+        calculatePageLimitTest(10_000L, 30L, 10L, 300_001L);
+        calculatePageLimitTest(10_010L, 30L, 10L, 300_301L);
 
     }
 

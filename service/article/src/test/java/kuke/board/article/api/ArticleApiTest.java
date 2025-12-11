@@ -42,10 +42,17 @@ public class ArticleApiTest {
     @Test
     void readAllTest() {
         ArticlePageResponse response = restClient.get()
-            .uri("/v1/articles?boardId=1&pageSize=30&page=50000")
+            .uri("/v1/articles?boardId=1&pageSize=30&page=50010")
             .retrieve()
             .body(ArticlePageResponse.class);
 
+        /**
+         *  ( (N - 1) / K ) + 1 ) * M * K + 1
+         *  ( (50_000 - 1) / 10 ) + 1 ) * 30 * 10 + 1 = 1,500,001개
+         *  사용자가 50_000 ~ 50_010번 페이지에 머무르는 경우, 게시글이 1,500,001개의 게시글 존재 여부만 판단하면 됨
+         *  1_500_001개 이상 -> "다음" 버튼까지 활성화
+         *  1_500_001개 미만 -> 50_010번 페이지까지만 활성화
+         */
         System.out.println("response.getArticleCount(): " + response.getArticleCount());
         for (ArticleResponse article : response.getArticles()) {
             System.out.println("articleId = " + article.getArticleId());
