@@ -112,7 +112,29 @@ class CommentControllerV2Test {
         for (CommentResponse commentResponse : response2) {
             System.out.println("commentResponse.getCommentId() = " + commentResponse.getCommentId());
         }
+    }
 
+    @Test
+    void countTest() {
+        CommentResponse response1 = create(new CommentCreateRequestV2(2L, "my content1", null, 1L));
+
+        Long count1 = restClient.get()
+            .uri("/v2/comments/articles/{articleId}/count", 2L)
+            .retrieve()
+            .body(Long.class);
+
+        System.out.println("count1 = " + count1);
+
+        restClient.delete()
+            .uri("/v2/comments/{commentId}", response1.getCommentId())
+            .retrieve();
+
+        Long count2 = restClient.get()
+            .uri("/v2/comments/articles/{articleId}/count", 2L)
+            .retrieve()
+            .body(Long.class);
+
+        System.out.println("count2 = " + count2);
     }
 
     @Getter

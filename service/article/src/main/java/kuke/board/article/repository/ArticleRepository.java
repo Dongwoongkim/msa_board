@@ -62,5 +62,4 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
         @Param("limit") Long limit,
         @Param("lastArticleId") Long lastArticleId
     );
-
 }

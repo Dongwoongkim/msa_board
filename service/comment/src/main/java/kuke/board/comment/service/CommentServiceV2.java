@@ -3,8 +3,10 @@ package kuke.board.comment.service;
 import static java.util.function.Predicate.not;
 
 import java.util.List;
+import kuke.board.comment.entity.ArticleCommentCount;
 import kuke.board.comment.entity.CommentPath;
 import kuke.board.comment.entity.CommentV2;
+import kuke.board.comment.repository.ArticleCommentCountRepository;
 import kuke.board.comment.repository.CommentRepositoryV2;
 import kuke.board.comment.service.request.CommentCreateRequestV2;
 import kuke.board.comment.service.response.CommentPageResponse;
@@ -20,13 +22,14 @@ public class CommentServiceV2 {
 
     private final Snowflake snowflake = new Snowflake();
     private final CommentRepositoryV2 commentRepository;
+    private final ArticleCommentCountRepository articleCommentCountRepository;
 
     @Transactional
     public CommentResponse create(CommentCreateRequestV2 request) {
         CommentV2 parent = findParent(request);
         CommentPath parentCommentPath = parent == null ? CommentPath.create("") : parent.getCommentPath();
 
-        return CommentResponse.from(commentRepository.save(
+        CommentV2 comment = commentRepository.save(
             CommentV2.create(
                 snowflake.nextId(),
                 request.getContent(),
@@ -37,7 +40,17 @@ public class CommentServiceV2 {
                         .orElse(null)
                 )
             )
-        ));
+        );
+
+        int result = articleCommentCountRepository.increase(comment.getArticleId());
+
+        if (result == 0) {
+            articleCommentCountRepository.save(
+                ArticleCommentCount.init(comment.getArticleId(), 1L)
+            );
+        }
+
+        return CommentResponse.from(comment);
     }
 
     private CommentV2 findParent(CommentCreateRequestV2 request) {
@@ -62,6 +75,7 @@ public class CommentServiceV2 {
         commentRepository.findById(commentId)
             .filter(not(CommentV2::getDeleted))
             .ifPresent(comment -> {
+
                 if (hasChildren(comment)) {
                     comment.delete();
                 } else {
@@ -80,6 +94,7 @@ public class CommentServiceV2 {
 
     private void delete(CommentV2 comment) {
         commentRepository.delete(comment);
+        articleCommentCountRepository.decrease(comment.getArticleId());
 
         // 루트 댓글이 아닌경우 -> 논리적으로 삭제된 부모 댓글 재귀적으로 물리 delete
         if (!comment.isRoot()) {
@@ -96,8 +111,9 @@ public class CommentServiceV2 {
                 .stream()
                 .map(CommentResponse::from)
                 .toList(),
-            commentRepository.count(articleId, PageLimitCalculator.calculatePageLimit(page, pageSize, 10L)
-            ));
+            commentRepository.count(articleId, PageLimitCalculator.calculatePageLimit(page, pageSize, 10L))
+//            count(articleId)
+        );
     }
 
     public List<CommentResponse> readAllInfiniteScroll(Long articleId, String lastPath, Long pageSize) {
@@ -108,5 +124,11 @@ public class CommentServiceV2 {
         return comments.stream()
             .map(CommentResponse::from)
             .toList();
+    }
+
+    public Long count(Long articleId) {
+        return articleCommentCountRepository.findById(articleId)
+            .map(ArticleCommentCount::getCommentCount)
+            .orElse(0L);
     }
 }
