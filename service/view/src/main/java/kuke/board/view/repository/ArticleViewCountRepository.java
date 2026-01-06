@@ -14,13 +14,13 @@ public class ArticleViewCountRepository {
     private final StringRedisTemplate redisTemplate;
 
     public Long read(Long articleId) {
-        String result = redisTemplate.opsForValue().get(String.format(KEY_FORMAT, articleId));
+        String result = redisTemplate.opsForValue().get(generateKey(articleId));
 
         return result == null ? 0L : Long.parseLong(result);
     }
 
     public Long increase(Long articleId) {
-        return redisTemplate.opsForValue().increment(String.format(KEY_FORMAT, articleId), 1);
+        return redisTemplate.opsForValue().increment(generateKey(articleId), 1);
     }
 
     private String generateKey(long articleId) {
