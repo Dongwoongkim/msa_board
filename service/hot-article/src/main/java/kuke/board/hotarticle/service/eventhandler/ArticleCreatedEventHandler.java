@@ -16,6 +16,8 @@ public class ArticleCreatedEventHandler implements EventHandler<ArticleCreatedEv
         this.articleCreatedTimeRepository = articleCreatedTimeRepository;
     }
 
+    // Redis에 게시물 ID와 생성 시간 저장
+    // 자정까지의 남은 시간(TTL)을 함께 저장
     @Override
     public void handle(Event<ArticleCreatedEventPayload> event) {
         ArticleCreatedEventPayload payload = event.getPayload();

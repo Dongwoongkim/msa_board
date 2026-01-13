@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class ArticleDeletedHandler implements EventHandler<ArticleDeletedEventPayload> {
+public class ArticleDeletedEventHandler implements EventHandler<ArticleDeletedEventPayload> {
 
     private final HotArticleListRepository hotArticleListRepository;
     private final ArticleCreatedTimeRepository articleCreatedTimeRepository;

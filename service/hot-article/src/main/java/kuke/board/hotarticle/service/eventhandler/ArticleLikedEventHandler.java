@@ -17,6 +17,8 @@ public class ArticleLikedEventHandler implements EventHandler<ArticleLikedEventP
     @Override
     public void handle(Event<ArticleLikedEventPayload> event) {
         ArticleLikedEventPayload payload = event.getPayload();
+
+        // Redis에 좋아요 수 저장 (자정까지 유효)
         articleLikeCountRepository.createOrUpdate(payload.getArticleId(),
             payload.getArticleLikeCount(),
             TimeCalculatorUtils.calculateDurationToMidnight()

@@ -17,6 +17,8 @@ public class ArticleUnlikedEventHandler implements EventHandler<ArticleUnlikedEv
     @Override
     public void handle(Event<ArticleUnlikedEventPayload> event) {
         ArticleUnlikedEventPayload payload = event.getPayload();
+
+        // Redis에 좋아요 수 업데이트 (자정까지 유효)
         articleLikeCountRepository.createOrUpdate(payload.getArticleId(),
             payload.getArticleLikeCount(),
             TimeCalculatorUtils.calculateDurationToMidnight()

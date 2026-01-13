@@ -45,6 +45,8 @@ public class HotArticleListRepository {
     }
 
     public List<Long> readAll(String dateStr) {
+        // opsForZSet() : Redis에서 정렬된 집합 값을 다루기 위한 ZSetOperations 객체를 반환하며,
+        // 정렬된 집합에 값을 추가하거나 가져오는 등의 연산을 수행할 수 있음
         return redisTemplate.opsForZSet()
             .reverseRangeWithScores(generateKey(dateStr), 0, -1)
             .stream()

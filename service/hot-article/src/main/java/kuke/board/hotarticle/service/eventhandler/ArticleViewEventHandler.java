@@ -17,6 +17,8 @@ public class ArticleViewEventHandler implements EventHandler<ArticleViewedEventP
     @Override
     public void handle(Event<ArticleViewedEventPayload> event) {
         ArticleViewedEventPayload payload = event.getPayload();
+
+        // Redis에 조회 수 저장 (자정까지 유효)
         articleViewCountRepository.createOrUpdate(
             payload.getArticleId(),
             payload.getArticleViewCount(),

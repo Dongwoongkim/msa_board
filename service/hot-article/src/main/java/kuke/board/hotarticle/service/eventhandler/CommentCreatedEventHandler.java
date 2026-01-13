@@ -17,6 +17,8 @@ public class CommentCreatedEventHandler implements EventHandler<CommentCreatedEv
     @Override
     public void handle(Event<CommentCreatedEventPayload> event) {
         CommentCreatedEventPayload payload = event.getPayload();
+
+        // Redis에 댓글 수 저장 (자정까지 유효)
         articleCommentCountRepository.createOrUpdate(
             payload.getArticleId(),
             payload.getArticleCommentCount(),

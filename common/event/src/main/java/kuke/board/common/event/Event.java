@@ -10,6 +10,7 @@ public class Event<T extends EventPayload> {
     private EventType type;
     private T payload;
 
+    // 이벤트 생성
     public static Event<EventPayload> of(Long eventId, EventType type, EventPayload payload) {
         Event<EventPayload> event = new Event<>();
         event.eventId = eventId;
@@ -18,6 +19,7 @@ public class Event<T extends EventPayload> {
         return event;
     }
 
+    //  JSON 문자열 -> 이벤트 객체로 변경
     public static Event<EventPayload> fromJson(String json) {
         EventRaw eventRaw = DataSerializer.deserialize(json, EventRaw.class);
         if (eventRaw == null) {
@@ -32,6 +34,7 @@ public class Event<T extends EventPayload> {
         return event;
     }
 
+    // 이벤트 -> JSON 문자열로 파싱
     public String toJson() {
         return DataSerializer.serialize(this);
     }
