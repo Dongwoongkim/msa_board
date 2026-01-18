@@ -3,8 +3,10 @@ package kuke.board.hotarticle.service.response;
 import java.time.LocalDateTime;
 import kuke.board.hotarticle.client.ArticleClient.ArticleResponse;
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
+@ToString
 public class HotArticleResponse {
 
     private Long articleId;

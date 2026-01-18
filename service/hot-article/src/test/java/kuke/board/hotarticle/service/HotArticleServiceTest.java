@@ -21,6 +21,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class HotArticleServiceTest {
 
+    /**
+     * InjeckMocks로 가짜 객체 주입, Mock로 가짜 객체가 의존 객체 주입
+     */
     @InjectMocks
     HotArticleService hotArticleService;
 

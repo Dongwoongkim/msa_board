@@ -16,7 +16,7 @@ public class ArticleClient {
 
     private RestClient restClient;
 
-    @Value("${spring.endpoints.kuke-board-article-service.url")
+    @Value("${spring.endpoints.kuke-board-article-service.url}")
     private String articleServiceUrl;
 
     @PostConstruct
@@ -32,6 +32,7 @@ public class ArticleClient {
                 .body(ArticleResponse.class);
         } catch (Exception e) {
             log.error("[ArticleClient.read] articleId = {}", articleId, e);
+            log.error("articleServiceUrl = {}", articleServiceUrl);
         }
 
         return null;

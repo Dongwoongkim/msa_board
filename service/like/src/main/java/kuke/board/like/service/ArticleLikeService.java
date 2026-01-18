@@ -1,5 +1,9 @@
 package kuke.board.like.service;
 
+import kuke.board.common.event.EventType;
+import kuke.board.common.event.payload.ArticleLikedEventPayload;
+import kuke.board.common.event.payload.ArticleUnlikedEventPayload;
+import kuke.board.common.outboxmessagerelay.OutboxEventPublisher;
 import kuke.board.common.snowflake.Snowflake;
 import kuke.board.like.entity.ArticleLike;
 import kuke.board.like.entity.ArticleLikeCount;
@@ -15,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ArticleLikeService {
 
     private final Snowflake snowflake = new Snowflake();
+    private final OutboxEventPublisher publisher;
     private final ArticleLikeRepository articleLikeRepository;
     private final ArticleLikeCountRepository articleLikeCountRepository;
 
@@ -40,6 +45,18 @@ public class ArticleLikeService {
                 ArticleLikeCount.init(articleId, 1L)
             );
         }
+
+        publisher.publish(
+            EventType.ARTICLE_LIKED,
+            ArticleLikedEventPayload.builder()
+                .articleLikeId(articleLike.getArticleLikeId())
+                .articleId(articleLike.getArticleId())
+                .userId(articleLike.getUserId())
+                .createdAt(articleLike.getCreatedAt())
+                .articleLikeCount(count(articleLike.getArticleId()))
+                .build(),
+            articleLike.getArticleId()
+        );
     }
 
     /**
@@ -51,6 +68,18 @@ public class ArticleLikeService {
             .ifPresent(articleLike -> {
                 articleLikeRepository.delete(articleLike);
                 articleLikeCountRepository.decrease(articleId); // dirty check로 save하지 않아도 ok
+
+                publisher.publish(
+                    EventType.ARTICLE_UNLIKED,
+                    ArticleUnlikedEventPayload.builder()
+                        .articleLikeId(articleLike.getArticleLikeId())
+                        .articleId(articleLike.getArticleId())
+                        .userId(articleLike.getUserId())
+                        .createdAt(articleLike.getCreatedAt())
+                        .articleLikeCount(count(articleLike.getArticleId()))
+                        .build(),
+                    articleLike.getArticleId()
+                );
             });
     }
 
