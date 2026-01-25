@@ -1,7 +1,8 @@
-package kuke.board.hotarticle.client;
+package kuke.board.articleread.client;
 
 import jakarta.annotation.PostConstruct;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,22 +21,21 @@ public class ArticleClient {
     private String articleServiceUrl;
 
     @PostConstruct
-    void initRestClient() {
+    public void initRestClient() {
         restClient = RestClient.create(articleServiceUrl);
     }
 
-    public ArticleResponse read(Long articleId) {
+    public Optional<ArticleResponse> read(Long articleId) {
         try {
-            return restClient.get()
+            ArticleResponse articleResponse = restClient.get()
                 .uri("/v1/articles/{articleId}", articleId)
                 .retrieve()
                 .body(ArticleResponse.class);
+            return Optional.of(articleResponse);
         } catch (Exception e) {
             log.error("[ArticleClient.read] articleId = {}", articleId, e);
-            log.error("articleServiceUrl = {}", articleServiceUrl);
+            return Optional.empty();
         }
-
-        return null;
     }
 
     @Getter
@@ -43,6 +43,10 @@ public class ArticleClient {
 
         private Long articleId;
         private String title;
+        private String content;
+        private Long boardId;
+        private Long writerId;
         private LocalDateTime createdAt;
+        private LocalDateTime modifiedAt;
     }
 }
