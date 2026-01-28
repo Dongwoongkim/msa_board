@@ -1,7 +1,13 @@
 package kuke.board.articleread.repository;
 
+import static java.util.function.Function.identity;
+
 import java.time.Duration;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import kuke.board.common.dataserializer.DataSerializer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -41,5 +47,17 @@ public class ArticleQueryModelRepository {
 
     private String generateKey(Long articleId) {
         return String.format(KEY_FORMAT, articleId);
+    }
+
+    public Map<Long, ArticleQueryModel> readAll(List<Long> articleIds) {
+        List<String> keys = articleIds.stream()
+            .map(this::generateKey).toList();
+
+        return redisTemplate.opsForValue()
+            .multiGet(keys)
+            .stream()
+            .filter(Objects::nonNull)
+            .map(json -> DataSerializer.deserialize(json, ArticleQueryModel.class))
+            .collect(Collectors.toMap(ArticleQueryModel::getArticleId, identity()));
     }
 }
