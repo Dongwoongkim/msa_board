@@ -25,7 +25,7 @@ public class DataSerializer {
             return objectMapper.readValue(data, clazz);
         } catch (JsonProcessingException e) {
             log.error("[DataSerializer.deserialize] data = {}, clazz = {}", data, clazz, e);
-            throw new RuntimeException(e);
+            return null;
         }
     }
 
@@ -38,7 +38,7 @@ public class DataSerializer {
             return objectMapper.writeValueAsString(obj);
         } catch (JsonProcessingException e) {
             log.error("[DataSerializer.serialize] object = {}", obj, e);
-            throw new RuntimeException(e);
+            return null;
         }
     }
 }
