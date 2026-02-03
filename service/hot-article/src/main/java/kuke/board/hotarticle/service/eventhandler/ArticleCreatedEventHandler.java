@@ -5,16 +5,15 @@ import kuke.board.common.event.EventType;
 import kuke.board.common.event.payload.ArticleCreatedEventPayload;
 import kuke.board.hotarticle.repository.ArticleCreatedTimeRepository;
 import kuke.board.hotarticle.utils.TimeCalculatorUtils;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class ArticleCreatedEventHandler implements EventHandler<ArticleCreatedEventPayload> {
 
     private final ArticleCreatedTimeRepository articleCreatedTimeRepository;
-
-    public ArticleCreatedEventHandler(ArticleCreatedTimeRepository articleCreatedTimeRepository) {
-        this.articleCreatedTimeRepository = articleCreatedTimeRepository;
-    }
 
     // Redis에 게시물 ID와 생성 시간 저장
     // 자정까지의 남은 시간(TTL)을 함께 저장

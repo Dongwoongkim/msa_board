@@ -20,6 +20,9 @@ public class DataSerializer {
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
+    /**
+     * Json To Object
+     */
     public static <T> T deserialize(String data, Class<T> clazz) {
         try {
             return objectMapper.readValue(data, clazz);
@@ -29,6 +32,9 @@ public class DataSerializer {
         }
     }
 
+    /**
+     * Object to Object
+     */
     public static <T> T deserialize(Object data, Class<T> clazz) {
         return objectMapper.convertValue(data, clazz);
     }
